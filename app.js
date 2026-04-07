@@ -246,7 +246,7 @@ function setupEventListeners() {
 
         const reader = new FileReader();
         reader.onload = (event) => {
-            els.previewImage.src = event.target.result;
+            els.previewImage.style.backgroundImage = `url(${event.target.result})`;
             processCheckIn();
         };
         reader.readAsDataURL(file);
