@@ -246,8 +246,39 @@ function setupEventListeners() {
 
         const reader = new FileReader();
         reader.onload = (event) => {
-            els.previewImage.style.backgroundImage = `url(${event.target.result})`;
-            processCheckIn();
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                // We want a vertical 3:4 ratio output
+                const targetRatio = 3 / 4;
+                const srcRatio = img.width / img.height;
+                
+                let sWidth = img.width;
+                let sHeight = img.height;
+                let sx = 0;
+                let sy = 0;
+                
+                if (srcRatio > targetRatio) {
+                    // Source is wider (e.g. 16:9 landscape photo) -> crop sides
+                    sWidth = img.height * targetRatio;
+                    sx = (img.width - sWidth) / 2;
+                } else {
+                    // Source is taller -> crop top and bottom
+                    sHeight = img.width / targetRatio;
+                    sy = (img.height - sHeight) / 2;
+                }
+                
+                // Set high quality output dimensions (e.g 1080x1440)
+                canvas.width = 1080;
+                canvas.height = 1440;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 1080, 1440);
+                
+                // Get the perfectly cropped image and assign it directly
+                els.previewImage.src = canvas.toDataURL('image/jpeg', 0.9);
+                processCheckIn();
+            };
+            img.src = event.target.result;
         };
         reader.readAsDataURL(file);
     });
